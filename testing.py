@@ -6,9 +6,10 @@ pygame.mixer.init()
 pygame.init()
 pygame.mixer.music.load("resources/audio/lyre/0.wav")
 
-def play():
+def play(a):
     print("a")
     pygame.mixer.music.play()
 
-kb.add_hotkey('a', play)
+kb.hook(play)
+kb.add_hotkey('a', lambda a: play(a))
 kb.wait()

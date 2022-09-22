@@ -18,9 +18,16 @@ class MyWidget(QMainWindow):
         pygame.init()
         
         self.keys_str = "qwertyuasdfghjzxcvbnm"
+        self.keys_ru = "йцукенгфывапроячсмить"
         self.curr_channel = 0
         self.init_sounds()
         self.init_keys()
+        
+        self.paused = False
+        kb.add_hotkey("shift+right shift", self.pause)
+
+    def pause(self):
+        self.paused = not self.paused
 
     def init_sounds(self):
         self.sounds = {}
@@ -28,19 +35,22 @@ class MyWidget(QMainWindow):
             s = pygame.mixer.Sound(os.path.join(basedir, f"./resources/audio/lyre/{i}.wav"))
             s.set_volume(0.3)
             self.sounds[self.keys_str[i]] = s
+            self.sounds[self.keys_ru[i]] = s
 
-    def play(self, event):        
-        pygame.mixer.Channel(self.curr_channel).play(self.sounds[event.name])
+    def play(self, event):
+        if self.paused:
+            return
+        
+        pygame.mixer.Channel(self.curr_channel).play(self.sounds[str.lower(event.name)])
         self.curr_channel += 1
         if self.curr_channel >= 50:
             self.curr_channel = 0
-        print(event.name, end=' ')
-        sys.stdout.flush()
+        print(event.name)
 
     def init_keys(self):
         self.listeners = {}
         for key in self.keys_str:
-            self.listeners[key] = kb.on_press_key(key, self.play) 
+            self.listeners[key] = kb.on_press_key(key, self.play)
         
     def handle(self):
         # self.book.addItem(f"{self.name.text()} - {self.phone.text()}")

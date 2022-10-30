@@ -2,7 +2,7 @@ import sys, os
 import keyboard as kb
 from PyQt5 import uic
 from PyQt5.QtGui import QIcon
-from PyQt5.QtCore import QSize, Qt, QTimer
+from PyQt5.QtCore import QSize, Qt
 from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton
 from pprint import pprint
 import pygame
@@ -48,7 +48,7 @@ class MyWidget(QMainWindow):
             6: 'ti'
         }
         for i in range(21):
-            b = QPushButton('', self)
+            b = QPushButton(str.upper(self.keys_str[i]), self)
             b.clicked.connect(self.play)
             b.setIcon(QIcon(os.path.join(basedir, f"./resources/icons/{btns[i % 7]}.svg")))
             b.name = self.keys_str[i]
@@ -57,7 +57,7 @@ class MyWidget(QMainWindow):
             self.buttons.append(b)
     
     def init_sounds(self):
-        self.sounds = {}
+        self.sounds = {} 
         for i in range(21):
             s = pygame.mixer.Sound(os.path.join(basedir, f"./resources/audio/lyre/{i}.wav"))
             s.set_volume(0.3)
@@ -72,7 +72,7 @@ class MyWidget(QMainWindow):
             
         if len(self.label.text()) > 15:
             self.label.setText("")
-        self.label.setText(self.label.text() + event.name)
+        self.label.setText(self.label.text() + str.upper(event.name))
             
         pygame.mixer.Channel(self.curr_channel).play(self.sounds[str.lower(event.name)])
         self.curr_channel += 1

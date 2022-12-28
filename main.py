@@ -1,9 +1,12 @@
 import sys, os
 import keyboard as kb
 from PyQt5 import uic
-from PyQt5.QtWidgets import QApplication, QMainWindow
+from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog
 from pprint import pprint
 import pygame
+
+from player import Player
+
 
 basedir = os.path.dirname(__file__)
 
@@ -11,50 +14,65 @@ class MyWidget(QMainWindow):
     def __init__(self):
         super().__init__()
         uic.loadUi(os.path.join(basedir, './resources/main.ui'), self)
-        
         pygame.mixer.pre_init(44100, -16, 2, 512)
         pygame.mixer.init()
         pygame.mixer.set_num_channels(50)
         pygame.init()
         
-        self.keys_str = "qwertyuasdfghjzxcvbnm"
-        self.keys_ru = "йцукенгфывапроячсмить"
-        self.curr_channel = 0
-        self.init_sounds()
-        self.init_keys()
+        self.tracks = {}
+        self.tracksl = []
         
-        self.paused = False
-        kb.add_hotkey("shift+right shift", self.pause)
-
-    def pause(self):
-        self.paused = not self.paused
-
-    def init_sounds(self):
-        self.sounds = {}
-        for i in range(21):
-            s = pygame.mixer.Sound(os.path.join(basedir, f"./resources/audio/lyre/{i}.wav"))
-            s.set_volume(0.3)
-            self.sounds[self.keys_str[i]] = s
-            self.sounds[self.keys_ru[i]] = s
-
-    def play(self, event):
-        if self.paused:
+        self.btnAdd.clicked.connect(self.addTrackFile)
+        self.btnDelete.clicked.connect(self.deleteTrack)
+        self.btnPlay.clicked.connect(self.playTrack)
+    
+    def deleteTrack(self):
+        title = self.trackList.currentItem()
+        if title is None:
             return
+        title = title.text()
         
-        pygame.mixer.Channel(self.curr_channel).play(self.sounds[str.lower(event.name)])
-        self.curr_channel += 1
-        if self.curr_channel >= 50:
-            self.curr_channel = 0
-        print(event.name)
+        idx = self.tracksl.index(title)
+        del self.tracksl[idx]
 
-    def init_keys(self):
-        self.listeners = {}
-        for key in self.keys_str:
-            self.listeners[key] = kb.on_press_key(key, self.play)
-        
-    def handle(self):
-        # self.book.addItem(f"{self.name.text()} - {self.phone.text()}")
-        ...
+        self.trackList.takeItem(idx)
+        del self.tracks[title]
+            
+    def playTrack(self):
+        title = self.trackList.currentItem()
+        vol = self.sliderVolume.sliderPosition()
+        if title is None:
+            self.player = Player("", vol)
+        else: 
+            self.player = Player(self.tracks[title.text()], vol)
+        self.player.show()
+    
+    def addTrack(self, fnames: list):
+        text = []
+        for fname in fnames:
+            with open(fname, 'r') as f:
+                text = f.read()
+                title = fname.split('/')[-1].split('.')[0]
+                self.tracks[title] = text
+                self.tracksl.append(title)
+                self.trackList.addItem(title)
+    
+    def addTrackFile(self):
+        fname, ok = QFileDialog.getOpenFileName(
+            self, 'Выбрать файл', '',
+            'Текстовый файл (*.txt);;Все файлы (*)')
+        if ok:
+            self.addTrack([fname])
+    
+    def dragEnterEvent(self, event):
+        if event.mimeData().hasUrls():
+            event.accept()
+        else:
+            event.ignore()
+
+    def dropEvent(self, event):
+        files = [u.toLocalFile() for u in event.mimeData().urls()]
+        self.addTrack(files)
 
 
 if __name__ == '__main__':

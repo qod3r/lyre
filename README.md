@@ -2,17 +2,24 @@
 Приложение-эмулятор лиры с графическим интерфейсом и глобальным захватом клавиатуры
 
 ## Библиотеки
-GUI - PyQt5\
-Звуки - pygame\
+```
+GUI - PyQt5
+Звуки - pygame
 Захват клавиатуры - keyboard
+```
 
 ## Запуск
-`Скачать готовый .exe файл из Releases` \
+```
+Скачать готовый .exe файл из Releases
+```
 или
-1. `git clone https://github.com/qod3r/lyre.git && cd lyre`
-2. `git branch sem`
-3. `pip install -r requirements.txt`
-4. `pyinstaller main.spec`
+```
+git clone https://github.com/qod3r/lyre.git && cd lyre
+git checkout sem
+pip install -r requirements.txt
+pyinstaller main.spec
+запустить /dist/main.exe
+```
 
 ## Использование
 В главном окне можно загрузить текстовые файлы с нотами (поддерживается Drag-and-drop), либо включить плеер без них
